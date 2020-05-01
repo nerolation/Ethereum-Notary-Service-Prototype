@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Hash2ETH</title>
+    <link rel="stylesheet" href="static/styles.css">
+
+    <script type=text/javascript>
+    if(document.location == "https://signtochain.herokuapp.com/") {
+      document.location = "http://hashtoeth.toniwahrstaetter.com";
+    }
+
+	var contractaddress = "0x32e63Ce6184bF5C2a9EC295C52739F08179eC824"
+
+	 function getHref() {
+	 document.querySelector("td.blocknr").getAttribute("href") = "https://ropsten.etherscan.io/block/"+"{{blocknr}}";
+	 return;
+	 };
+
+	 function setCookie(name, v) {
+	  var d = new Date();
+	  d.setTime(d.getTime() + (1*60*1000));
+	  var expires = "expires="+ d.toUTCString();
+	  var cvalue = v;
+	  document.cookie = name + "=" + cvalue + ";" + expires + ";path=/";
+	}
+	function getCookie(name) {
+	  var value = "; " + document.cookie;
+	  var parts = value.split("; " + name + "=");
+	  if (parts.length == 2) return parts.pop().split(";").shift();
+	}
+	function getRopsten(elem, data) {
+		var _href;
+		if (elem == "address") {
+			var _href = 'https://ropsten.etherscan.io/address/' + data;
+			window.location = _href;
+		}
+		if (elem == "block") {
+			var _href = 'https://ropsten.etherscan.io/block/' + data;
+			window.location = _href;
+		}
+		if (elem == "tx") {
+			var _href = 'https://ropsten.etherscan.io/tx/' + data;
+			console.log(data);
+			window.location = _href;
+		}
+	}
+	function timeConverter(UNIX_timestamp){
+	  var a = new Date(UNIX_timestamp * 1000);
+	  var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+	  var year = a.getFullYear();
+	  var month = months[a.getMonth()];
+	  var date = a.getDate();
+	  var hour = a.getHours();
+	  var min = a.getMinutes();
+	  var sec = a.getSeconds();
+	  var time = date + ' ' + month + ' ' + year + ' ' + hour + ':' + min + ':' + sec ;
+	  return time;
+	}
+	function hide_title() {
+			var h1 = document.getElementById("title");
+			var h2 = document.getElementById("title2");
+			var h3 = document.getElementById("title3");
+			var help = document.getElementById("helper");
+			if (document.getElementsByClassName("tablinks active")[0] != undefined) {
+			 h1.style.display =  "none";
+			 h2.style.display =  "none";
+			 h3.style.display =  "none";
+			 helper.style.display =  "none";
+		}}
+	</script>
+</head>
+
+
+<body style="background: url('static/moon2.jpg') no-repeat center center fixed;
+        -webkit-background-size: cover;
+        -moz-background-size: cover;
+        -o-background-size: cover;
+        background-size: cover;">
+
+
+<div class="tab">
+	<button class="tablinks" onclick="opentab(event, 'Generate')">Generate Keypair</button>
+  <button class="tablinks" onclick="opentab(event, 'Sign')">Sign</button>
+  <button class="tablinks" onclick="opentab(event, 'Verify')">Verify</button>
+	<button class="tablinks" onclick="opentab(event, 'Whosigned')">Who signed...?</button>
+	<button class="tablinks" onclick="opentab(event, 'history')">History</button>
+
+</div>
+<div id="Generate" class="tabcontent">
+	<div class="gap-30"></div>
+	<div class="gap-30"></div>
+	 <!-- KEY GENERATION -->
+<table align="center" border="1" cellpadding="1" cellspacing="1" style="width:400px;">
+	<thead>
+		<tr style="height:70px;">
+			<th scope="col">Generate Key Pair</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+			<td><div class="gap-10"></div>
+			<form action="/generate" method="post" style="text-align: center; margin-bottom: 50px;"><input name="submit" type="submit" value="Generate" /> {% if address != None %}
+			<p id = "address" style="font-size:13px">Address: {{ address }}</p>
+			{% endif %}
+
+			<p><textarea class="large" name="pkey" placeholder="New Key Pair..." readonly="readonly" required="required">{% if privkey != None %} {{ privkey }} {% endif %}</textarea></p>
+			</form>
+			</td>
+		</tr>
+	</tbody>
+</table>
+
+	</div>
+<div id="Sign" class="tabcontent">
+<div class="gap-30"></div>
+	<div class="gap-30"></div>
+<table align="center" border="1" cellpadding="1" cellspacing="1" style="width:400px;">
+	<thead>
+		<tr style="height:70px;">
+			<th scope="col">Enter your Private Key and select a file</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+			<td>
+			<form action="/submit" enctype="multipart/form-data" method="post" style="text-align: center; margin-bottom: 50px;">
+			<p><textarea class="large" name="pkey" placeholder="Enter private key here" required="required" rows="4">f56a1e666b0e3db8c973a1343f3ddad7e05b3cbefbe745dd9c208c385548558b</textarea></p>
+
+			<p><textarea class="small" name="name" placeholder="Name (optional)" rows="1"></textarea></p>
+
+			<input id="file2" name="file" style="position: ;padding-left: 30px;padding-right: 30px;padding-top: 10px;padding-bottom: 20px;" type="file" />
+				</br>
+				<input type="checkbox" name="check"  checked>Use Testnet</br>
+				<div class="gap-10"></div>
+				<input name="submit" type="submit" value="Submit" /></form>
+			</td>
+		</tr>
+	</tbody>
+</table>
+
+</div>
+
+<div id="Verify" class="tabcontent">
+<div class="gap-30"></div>
+	<div class="gap-30"></div>
+  <table align="center" border="1" cellpadding="1" cellspacing="1" style="width:400px;">
+	<thead>
+		<tr style="height:70px;">
+			<th scope="col">Enter Signature to verify</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+			<td>
+			<form action="/verify" enctype="multipart/form-data" method="post" style="text-align: center; margin-bottom: 50px;">
+			<p><textarea class="large" name="sig" placeholder="Enter sig here" required="required" rows="10"></textarea></p>
+
+			<p><input id="file" name="file" style=";padding-left: 30px;padding-right: 30px;padding-top: 10px;padding-bottom: 20px;" type="file" />
+				</br>
+				<input type="checkbox" name="check2"  checked>Use Testnet</br></br>
+
+				<input name="verify" type="submit" value="Verify" /></p>
+
+			</form>
+			</td>
+
+		</tr>
+	</tbody>
+</table>
+<div align="center">
+				<a class="buttonDownload" href="/static/google-drive.png" download>Download Example File</a>
+</div>
+
+</div>
+<div id="myModal" class="modal">
+<div class="modal-content">
+<span class="close">&times;</span>
+	<div class="txwr">
+	<h1 class="heading"></h1>
+	<p> Success!!!</p>
+	<h1 class="heading"></h1>
+	<p> The uploaded file was successfully verified!</p>
+	<h1 class="heading"></h1>
+	<p id="confirmsig"><textarea id="confirmsig2" style="border: none;background-color: #001f3f; color: white;width: 95%; display:none; height: 60px" cols="60" rows="30" readonly="readonly"></textarea>{% if web3Ver != None %}  The signature was created by the address: {{web3Ver}} {% endif %}</p>
+		<button onclick="copytoclipboard(elem='sig')" style="display:none" id="sigbutton">Copy Sig</button>
+	<h1 class="heading"></h1>
+	<p></p>
+	<h1 class="heading"></h1>
+	<p></p>
+	<h1 class="heading"></h1>
+	<p></p>
+		<h1 class="heading"></h1>
+	<p style=" text-decoration: underline" onclick="getRopsten('address', contractaddress)">
+	</p>
+		<h1 class="heading"></h1>
+	<p></p>
+</div>
+  </div>
+{% if status2 == 2 %}
+<script>
+document.addEventListener("DOMContentLoaded", function(event) {
+		var modalbottom = document.getElementById("myModalbottom");
+		modalbottom.getElementsByTagName("p")[0].innerHTML = "FAILURE";
+		modalbottom.getElementsByTagName("p")[1].innerHTML = "<br>Note: It's only possible to get information about the last sig produced by an address";
+		modalbottom.getElementsByTagName("p")[2].innerHTML = "";
+
+		modalbottom.querySelector("div").style = "background-color: #640000";
+
+});
+</script>
+{% endif %}
+
+
+</div>
+{% if status2 != 0 %}
+<script>
+var status2 = {{status2|tojson|safe}};
+document.addEventListener("DOMContentLoaded", function() {
+	var modalbottom = document.getElementById("myModalbottom");
+	modalbottom.style ="display:block";
+
+});
+document.addEventListener("DOMContentLoaded", function(event) {
+	var modalbottom = document.getElementById("myModalbottom");
+	var span = modalbottom.getElementsByClassName("close")[0];
+	span.onclick = function() {
+	  modalbottom.style.display = "none";
+	}
+})
+
+</script>
+
+
+
+<div id="myModalbottom" class="modal">
+
+  <!-- Modal content -->
+
+  <div class="modal-content">
+
+	 <!-- <div class="modal-content-neg"> -->
+
+    <span class="close">&times;</span>
+	<div class="txwr">
+	<h1 class="heading"></h1>
+	<p> Success!!!</p>
+	<h1 class="heading"></h1>
+	<p> The provided signature was found on to the Ethereum Blockchain!</p>
+	<h1 class="heading"></h1>
+		<p>  The signature was created by <b>{% if matchedData != False %}{{matchedData.username}} with {% endif %}the address: {{contVer}} </p>
+		{% if matchedData != False %}
+	<h1 class="heading">Tx Information</h1>
+	<p id="whosignedtime">{{matchedData["time"]}}</p>
+	<h1 class="heading">Tx Hash</h1>
+	<p style="text-decoration:underline; cursor:pointer" id="wshash">{{matchedData.txHash[0:10]}} ... {{matchedData.txHash[-5:]}}</p>
+	<h1 class="heading">Signature</h1>
+	<p style="text-decoration:underline; cursor:pointer" id="wsdata">{{matchedData.sig[0:10]}} ... {{matchedData.sig[-5:]}}</p>
+		<h1 class="heading">Contract Address</h1>
+	<p style="text-decoration:underline; cursor:pointer" id="wsaddr">{{matchedData.tx.to}}</p>
+
+		<h1 class="heading"></h1>
+	<p></p>
+		{% endif %}
+
+{% if matchedData != False %}
+<script>
+	document.addEventListener("DOMContentLoaded", function() {
+		var time = document.getElementById("whosignedtime");
+		var whentry = {{matchedData|tojson}};
+		console.log(whentry);
+		time.innerHTML = timeConverter(whentry.time);
+		document.querySelector("#wshash").onclick = function() {getRopsten("tx", whentry.txHash)};
+		document.querySelector("#wsdata").onclick = function() {alert(whentry.sig)};
+		document.querySelector("#wsaddr").onclick = function() {getRopsten("address", whentry.tx.to)};
+	})
+
+</script>
+{% endif %}
+
+
+</div>
+  </div>
+
+</div>
+{% endif %}
+<div id="Whosigned" class="tabcontent">
+	<div class="gap-30"></div>
+	<div class="gap-30"></div>
+<table align="center" border="1" cellpadding="1" cellspacing="1" style="width:400px;">
+	<thead>
+		<tr style="height:70px;">
+			<th scope="col">Who signed ... </th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+			<td>
+			<form action="/whosigned" enctype="multipart/form-data" method="post" style="text-align: center; margin-bottom: 50px;">
+			<p><textarea class="large" name="sig" placeholder="Enter sig here" required="required" rows="10"></textarea></p>
+			</br>
+				<input type="checkbox" name="check3"  checked>Use Testnet</br></br>
+				<input name="whosigned" type="submit" value="Get address" />
+			</form>
+			</td>
+		</tr>
+	</tbody> <!-- txHash, addr, sig, blockNumber, blockHash.hex(), username-->
+</table>
+{% if status2 != 0 %}
+<script>
+var status2 = {{status2|tojson|safe}};
+document.addEventListener("DOMContentLoaded", function() {
+	var modalbottom = document.getElementById("myModalbottom");
+	modalbottom.style ="display:block";
+
+});
+document.addEventListener("DOMContentLoaded", function(event) {
+	var modalbottom = document.getElementById("myModalbottom");
+	var span = modalbottom.getElementsByClassName("close")[0];
+	span.onclick = function() {
+	  modalbottom.style.display = "none";
+	}
+})
+
+
+</script>
+
+{% endif %}
+</div>
+
+
+<div id="history" class="tabcontent">
+<table align="center" border="1" cellpadding="1" cellspacing="1" style="width:700px;">
+	<thead>
+		<tr style="height:70px;">
+			<th scope="col">History</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+			<td>
+			<table cellpadding="10" class="small">
+				<thead style="font-weight: bold; text-align:center"><tr> <td>User</td><td>Date</td><td>Tx Hash</td><td></td></tr></thead>
+				<tbody> <!-- txHash, addr, sig, blockNumber, blockHash.hex(), username-->
+				{% for entry in history.keys() %}
+
+					<tr class="histrow">
+						<td style="overflow:hidden" class="histcol"><p style="margin-left: 15px;font-weight: bold;display: inline;"> {{ history[entry]["username"]}}</p><br><p style="margin-left: 15px;">{{ history[entry]["address"][0:10] + "  ...   " + history[entry]["address"][-5:]}}</p></td>
+						<td  id="{{history[entry]['time']}}" class="histtime"></td>
+						<td  id="{{history[entry]['txHash']}}" class="histhash" style="cursor:pointer;color: #0000EE; text-decoration : underline">{{ history[entry]["txHash"][0:10] + "  ...   " + history[entry]["txHash"][-5:] }} </td>
+						<td class="histcol"> <div style="text-align:center;cursor:pointer" ><button style="width: 100px; height: 30px; font-size: 9pt;" type="button" onclick="showHistInfo({{history[entry]}})">Show Info</button></div></td>
+
+					</tr>
+
+				{% endfor %}
+
+
+				</tbody>
+			</table>
+
+			</td>
+		</tr>
+	</tbody>
+</table>
+	<div  id="myModalHist" class="modal">
+		<div class="modal-content">
+			<span class="close">&times;</span>
+			<table style="border:none; border-collapse:inherit; background-color:#001f3f" cellpadding="10" >
+				<thead>
+				</thead>
+				<tbody id="histentries">
+					<tr><td style="width: 100px;">Username</td><td></td></tr>
+					<tr><td style="width: 100px;">Date</td><td></td></tr>
+					<tr><td style=" width: 100px;">Address</td><td style="cursor: pointer; text-decoration:underline"></td></tr>
+					<tr><td style="width: 100px;">Tx Hash</td><td><textarea id="hasharea" style="border: none;background-color: #001f3f; color: white;width: 95%; height: 40px" cols="60" rows="30" readonly="readonly"></textarea>
+					<br><button style="width: 120px; height: 30px;display: inline-block; text-align: center; font-size: 9pt; display: block;margin-left: 30%;" type="button" onclick="copytoclipboard(elem='hash')">Copy Tx Hash</button></td></tr>
+					<tr><td style="width: 120px;">Signature</td><td><textarea id="sigarea" style="border: none;background-color: #001f3f; color: white;width: 95%; height: 70px" cols="60" rows="30" readonly="readonly"></textarea>
+					<br><button style="width: 120px; height: 30px;display: inline-block; text-align: center; font-size: 10pt; display: block;margin-left: 30%;" type="button" onclick="copytoclipboard(elem='sig')">Copy Sig</button></td></tr>
+					<tr><td style="width: 100px;">Blockhash</td><td><textarea id="blockarea" style="border: none;background-color: #001f3f; color: white;width: 95%; height: 40px" cols="60" rows="30" readonly="readonly"></textarea>
+					<br><button style="width: 130px; height: 30px;display: inline-block; text-align: center; font-size: 10pt; display: block;margin-left: 30%;" type="button" onclick="copytoclipboard(elem='block')">Copy Block Hash</button></td></tr>
+					<tr><td style="width: 100px;">Block Number</td><td></td></tr>
+					<tr><td style="width: 100px;">Gas Used</td><td></td></tr>
+				</tbody>
+			</table>
+		</div>
+	</div>
+
+
+</div>
+<script>
+function copytoclipboard(elem=undefined) {
+	if (elem == "sig") {
+		document.getElementById("sigarea").select();
+		document.execCommand('copy');
+	}
+	if (elem == "block") {
+		document.getElementById("blockarea").select();
+		document.execCommand('copy');
+	}
+	if (elem == "hash") {
+		document.getElementById("hasharea").select();
+		document.execCommand('copy');
+	}
+	if (elem == "sig2") {
+		document.getElementById("confirmsig2").select();
+		document.execCommand('copy');
+	}
+}
+
+function showHistInfo(entry) {
+	console.log(entry);
+	var entryrows = document.getElementById("histentries").getElementsByTagName("tr")
+	document.querySelector("#histentries > tr:nth-child(1) > td:nth-child(2)").innerHTML = entry.username;
+	document.querySelector("#histentries > tr:nth-child(2) > td:nth-child(2)").innerHTML = timeConverter(entry.time);
+	document.querySelector("#histentries > tr:nth-child(3) > td:nth-child(2)").innerHTML = entry.address;
+	document.querySelector("#histentries > tr:nth-child(4) > td:nth-child(2) > textarea").innerHTML = entry.txHash;
+	document.querySelector("#histentries > tr:nth-child(5) > td:nth-child(2) > textarea").innerHTML = entry.sig;
+	document.querySelector("#histentries > tr:nth-child(6) > td:nth-child(2) > textarea").innerHTML = entry.tx.blockHash;
+	document.querySelector("#histentries > tr:nth-child(7) > td:nth-child(2)").innerHTML = entry.tx.blockNumber;
+	document.querySelector("#histentries > tr:nth-child(8) > td:nth-child(2)").innerHTML = entry.tx.gas;
+	document.getElementById("myModalHist").style = "display:block";
+	document.querySelector("#histentries > tr:nth-child(3) > td:nth-child(2)").addEventListener("click", function(event) {
+		document.location = 'https://ropsten.etherscan.io/address/' + entry.address
+	})
+}
+document.addEventListener("DOMContentLoaded", function(event) {
+	var hashfields = document.getElementsByClassName("histhash");
+	var abc = {{ history|tojson}};
+	console.log(abc);
+	for (i=0; i<hashfields.length; i++) {
+		var id = hashfields[i].getAttribute("id");
+		hashfields[i].addEventListener("click", function(id) {document.location = 'https://ropsten.etherscan.io/tx/' + id.target.id;});
+	}
+	for (key in abc) {
+		var timeelem = document.getElementById(abc[key].time);
+		timeelem.innerHTML =  timeConverter(abc[key].time);
+	}
+})
+</script>
+<script>
+document.addEventListener("DOMContentLoaded", function(event) {
+var modalhist = document.getElementById("myModalHist");
+var modalbottom = document.getElementById("myModalbottom");
+var cmodal = window.document.getElementById("myModal");
+	var spanhist = modalhist.getElementsByClassName("close")[0];
+	spanhist.onclick = function() {
+	  modalhist.style.display = "none";
+	}
+
+	window.onclick = function(event) {
+	console.log(event.target);
+	console.log(cmodal);
+	  if (event.target == cmodal) {
+		cmodal.style.display = "none";
+	  }
+	  if (event.target == modalbottom) {
+		modalbottom.style.display = "none";
+	  }
+	  if (event.target == modalhist) {
+		modalhist.style.display = "none";
+	  }
+	}})</script>
+<script>
+function opentab(evt, tabName) {
+  var i, tabcontent, tablinks;
+  tabcontent = document.getElementsByClassName("tabcontent");
+  for (i = 0; i < tabcontent.length; i++) {
+    tabcontent[i].style.display = "none";
+  }
+  tablinks = document.getElementsByClassName("tablinks");
+  for (i = 0; i < tablinks.length; i++) {
+    tablinks[i].className = tablinks[i].className.replace(" active", "");
+  }
+  document.getElementById(tabName).style.display = "block";
+  evt.currentTarget.className += " active";
+  hide_title();
+}
+document.addEventListener("DOMContentLoaded", function(event) {
+	if (document.getElementById("address") != null) {
+		document.getElementById("Generate").style.display = "block";
+		document.getElementsByClassName("tablinks")[0].className += " active";
+		hide_title();
+	}})
+</script>
+<script>
+
+var doubleview = 0
+document.addEventListener("DOMContentLoaded", function(event) {
+    var status = {{showStatus}};
+	var cval = getCookie("ID");
+	var cvalbl = getCookie("bl")||[];
+	var bst = getCookie("bst");
+	var _users = {{ entryList|tojson }} || {}
+	if (cval && status == 0 && !document.getElementById("address") ) {
+		var cmodal = window.document.getElementById("myModal");
+		textElements = cmodal.querySelectorAll("p");
+		if (_users[cval] && cvalbl.indexOf(_users[cval].sig) == -1 && _users[cval].tx != null) {
+			textElements[0].innerHTML = _users[cval].username;
+			textElements[1].innerHTML = _users[cval].address;
+			textElements[2].querySelector("textarea").innerHTML = _users[cval].sig  ;
+			textElements[2].querySelector("textarea").style.display = "block";
+			textElements[3].innerHTML = _users[cval].txHash.slice(0,16) + " ... " + _users[cval].txHash.slice(-8,)  ;
+			textElements[4].innerHTML = _users[cval].tx.blockNumber;
+			textElements[5].innerHTML = _users[cval].tx.blockHash.slice(0,16) + " ... " + _users[cval].tx.blockHash.slice(-8,) ;
+			textElements[6].innerHTML = _users[cval].tx.to;
+			textElements[7].innerHTML = _users[cval].tx.gas;
+
+
+
+			var headings = document.getElementsByClassName("heading");
+			headers = ["Username", "Address", "Signature", "Transaction Hash", "Block Number", "Block Hash", "To (Contract)", "Gas used"];
+			for (var j = 0; j < headings.length; j++) {
+				document.getElementsByClassName("heading")[j].innerHTML = headers.shift();
+			}
+			textElements[3].onclick = function() {alert(_users[cval].txHash)};
+			textElements[3].style.cursor = "pointer";
+			textElements[1].onclick = function() {alert(_users[cval].address)};
+			textElements[1].style.cursor = "pointer";
+			textElements[2].onclick = function() {alert(_users[cval].sig)};
+			textElements[2].style.cursor = "pointer";
+			textElements[5].onclick = function() {alert(_users[cval].tx.blockHash)};
+			textElements[5].style.cursor = "pointer";
+			textElements[6].style.cursor = "pointer";
+			textElements[4].style = "text-decoration : underline; cursor: pointer";
+			textElements[4].addEventListener("click", (function(){getRopsten("block", _users[cval].tx.blockNumber)}));
+
+			document.getElementById("sigbutton").style.display = "block";
+			document.getElementById("sigbutton").addEventListener("click", (function(){copytoclipboard("sig2")}));
+
+
+			if (cvalbl.length > 0) {
+				var clist = JSON.parse(cvalbl);
+				clist.push(_users[cval].sig )
+
+				setCookie("bl", JSON.stringify(clist) )
+			}
+			else { setCookie("bl", JSON.stringify([_users[cval].sig]))}
+			setCookie("bst", 0)
+			cmodal.style.display = "block";
+			return;
+		}
+
+		var cmodal = window.document.getElementById("myModal");
+		if (typeof({{txhash}}) != "object" && (document.cookie.indexOf('bst=')==-1||bst == 0)) {
+			textElements = cmodal.querySelectorAll("p");
+			textElements[0].innerHTML = "Success";
+			textElements[1].innerHTML = "";
+			textElements[2].innerHTML = "";
+			textElements[3].innerHTML = "A signed hash of your file was written to the Ethereum Blockchain";
+			textElements[4].innerHTML = "Refresh the page until a second pop-up appears. <br> This means your transaction was mined";
+			textElements[5].innerHTML = "Signature: " + {{sig|tojson|safe}}.slice(0,12) + " ... " + {{sig|tojson|safe}}.slice(-8,);
+			textElements[6].innerHTML = "Tx Hash:  " + {{txhash|tojson|safe}}.slice(0,12) + " ... " + {{txhash|tojson|safe}}.slice(-8,);
+			textElements[6].onclick = function() {getRopsten("tx", {{txhash|tojson|safe}})};
+			textElements[5].style = "text-decoration : underline";
+			textElements[6].style = "text-decoration : underline; cursor: pointer";
+			var _sig = [{{sig}}];
+			if(_sig.length > 0) {
+				setCookie("bst", 1)
+				cmodal.style.display = "block";
+			}
+		return;
+	}}
+});
+</script>
+<script>
+document.addEventListener("DOMContentLoaded", function(event) {
+	var modal = document.getElementById("myModal");
+	var span = document.getElementsByClassName("close")[0];
+	span.onclick = function() {
+	  modal.style.display = "none";
+	}
+
+	var status = {{showStatus}};
+	if (status) {
+		openModal();
+		}
+	function openModal() {
+
+		var addr = {{web3Ver|tojson|safe}};
+		slot = modal.querySelectorAll("p");
+
+		if (status == 2){
+			modal.querySelectorAll("div")[0].setAttribute("class", "modal-content-neg")
+			slot[0].innerHTML = "Verification failed!!!" ;
+			slot[1].innerHTML = "The uploaded file was NOT verified!" ;
+			slot[2].innerHTML = "The signature was created by the address: " + addr ;
+		}
+		modal.style.display = "block";
+
+
+		return;
+		}
+		})
+</script>
+
+<script>
+	document.addEventListener("DOMContentLoaded", function(event) {
+		var text = null;
+		var_1 = {{showStatus}};
+		var_2 = {{contVer|tojson|safe}};
+		var_3 = {{web3Ver|tojson|safe}};
+		var_4 = {{username|tojson|safe}};
+		var_5 = {{sig|tojson|safe}};
+		console.log(var_4);
+		if (var_4 == "replaytx" ) {
+			var text = "Please wait until your last transaction is mined";
+		}
+		if (var_1 == 0 && var_2 == null && var_3 == "signature") {
+			var text = "Something with the provided signature went wrong. <br>Make sure to provide a signature in hex format of length 132";
+
+		}
+		if (var_4 == "nofile"||var_3 == "nofile") {
+			var text = "Please attach a file";
+
+		}
+		if (var_4 == "insufficient") {
+			var text = "Insufficient funds";
+
+		}
+		if (text) {alert(text)}
+	})
+
+</script>
+<div class="gap-30"></div>
+<div>
+	<p id="title" style="text-align: center; color:white"> <span style="font-size:72px; align:center">Hash to Ethereum</span></p>
+	<p id="title2" style="text-align: center; color:white"> <span style="font-size:30px; align:center">
+		An Interface to write, sign and verify <br> data on the Ethereum Blockchain.
+	</span></p>
+	<p id="title3" style="text-align: center; color:white"> <span style="font-size:20px; align:center">
+		This site is a buggy prototype. <br> Verification sometimes need a page refresh.
+	</span></p>
+</div>
+
+<div >
+
+	<script>
+		document.addEventListener("DOMContentLoaded", function(event) {
+			var helperbottom = document.getElementById("helperbutton");
+			var helpertext = document.getElementById("helpertext");
+			helperbottom.addEventListener("click", function(event) {
+				helpertext.style.display =  "block";
+		})})
+
+	</script>
+	<div id="helper" style="align-items: center;justify-content: center;margin: 0 auto; width: 400px">
+	<button style="display: flex; margin: 0 auto;text-align: center; width: 100px; height: 50px" id="helperbutton" value="Show Help">Show Help</button>
+	<p id="helpertext" style="text-align: center; width: 400px; display:none; color:white"><span style="line-height: 1.5; letter-spacing: 1.2px;font-size:16px;">
+		I.<br> Use the first tab to generate an 256 bits elliptic curve keypair. <br>
+		Visit the <a style="color: cornflowerblue;" target="_blank" href="https://faucet.ropsten.be/">Ropsten Faucet </a> and paste in the generated address. <br>
+		Copy/Save the generated Private Key and keep it secret. Use the test-ether from the faucet to
+		write a file onto the Ethereum Testnet (Ropsten)<br><br>
+
+		II.<br> The second tab allows you to write an unique identifier to the Ethereum Blockchain. In a first step the
+		file gets hashed. Then the provided private key is used to sign the hash. The signed hash is then stored in a
+		smart contract on Ethereum<br><br>
+		III.<br> Next it's possible to verify integrity and authenticity of a file and it's corresponding signature <br>
+		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;If the provided signature was written on the blockchain, the validation succeeds.<br>This is done
+		by calling a Smart Contract to verify that the signature was written to the smart contract by the entity that
+		created the provided signature. <br><br>
+
+		IV.<br> The 'Who signed...?' tab again is capable of verifying data but outputs some different information<br><br>
+		V.<br>The last tab provides an overview of all entries that were written to the blockchain. <br>
+		It will provide detailed information about the last(!) signature of an corresponding entity.
+		<br><br>
+		Note<br> It's possible to use the Ethereum Mainchain but it's not recommended as this site is still in prototyping
+		stage. For debugging purpose this website stores information about ever interaction<br>
+		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Do not risk that your Private Key gets compromised
+
+	</span></div></p>
+</div></div>
+</body>
+</html>
